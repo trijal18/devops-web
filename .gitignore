@@ -1,0 +1,39 @@
+# === Node.js (backend) ===
+backend/node_modules/
+backend/.env
+backend/package-lock.json
+backend/dist/
+backend/.DS_Store
+
+# === React frontend (Vite) ===
+frontend/node_modules/
+frontend/.env
+frontend/.DS_Store
+frontend/dist/
+frontend/.vite/
+
+# === Python microservice ===
+python_service/__pycache__/
+python_service/.env
+python_service/venv/
+python_service/.DS_Store
+
+# === OS/system files ===
+.DS_Store
+Thumbs.db
+
+# === Logs and temp files ===
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# === IDE/editor specific ===
+.vscode/
+.idea/
+*.code-workspace
+
+# === Environment ===
+.env
+.env.*
