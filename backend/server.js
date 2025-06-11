@@ -7,6 +7,8 @@ const session = require("express-session");
 const multer = require("multer");
 const FormData = require("form-data");
 const { PassThrough } = require("stream");
+const PDF = require("./models/PDF");
+
 
 dotenv.config();
 const app = express();
@@ -59,7 +61,17 @@ app.post("/api/generate", upload.single("pdf"), async (req, res) => {
       }
     );
 
-    res.json(data);
+    // Save to MongoDB
+    const newPdf = new PDF({
+      file_path: "", // optional if you don't store locally
+      filename: req.file.originalname,
+      summary: data.summary,
+      questions: data.mcqs || data.questions, // depends on your microservice key
+      user_id: req.session.user?._id || null // set only if auth is enabled
+    });
+
+    const savedPdf = await newPdf.save();
+    res.status(200).json(savedPdf);
   } catch (err) {
     console.error("AI microservice error:", err.message);
     res.status(500).json({ error: "Processing failed." });
