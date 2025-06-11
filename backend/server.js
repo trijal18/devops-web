@@ -76,7 +76,7 @@ app.post("/api/generate", upload.single("pdf"), async (req, res) => {
     });
 
     const { data } = await axios.post(
-      `${process.env.PYTHON_SERVICE_URL}/generate/`,
+      `http://localhost:5001/generate/`,
       form,
       {
         headers: form.getHeaders(),
