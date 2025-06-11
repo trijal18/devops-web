@@ -1,35 +1,33 @@
+// SignupPage.jsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api";
-import { useNavigate, Link } from "react-router-dom";
 
 export default function SignupPage() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
-  const nav = useNavigate();
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const navigate = useNavigate();
 
-  const handle = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/auth/signup", { username, email, password });
-      nav("/home");
-    } catch (e) {
-      setErr(e.response?.data?.error || "Signup failed");
-    }
-  };
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  async function submit() {
+    await api.post("/auth/signup", form);
+    navigate("/login");
+  }
 
   return (
     <div>
-      <h1>Signup</h1>
-      {err && <p>{err}</p>}
-      <form onSubmit={handle}>
-        <input placeholder="Username" value={username} onChange={e=>setUsername(e.target.value)} />
-        <input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
-        <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-        <button>Signup</button>
-      </form>
-      <Link to="/login">Login</Link>
+      <h2>Signup</h2>
+      <input name="username" placeholder="Username" onChange={handleChange} />
+      <input name="email" placeholder="Email" onChange={handleChange} />
+      <input
+        name="password"
+        type="password"
+        placeholder="Password"
+        onChange={handleChange}
+      />
+      <button onClick={submit}>Create Account</button>
     </div>
   );
 }

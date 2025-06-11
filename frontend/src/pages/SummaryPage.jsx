@@ -1,25 +1,21 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
 
 export default function SummaryPage() {
-  const { id } = useParams();
-  const [sum, setSum] = useState("");
-  const [qcount, setQcount] = useState(0);
+  const { pdf_id } = useParams();
+  const navigate = useNavigate();
+  const [summary, setSummary] = useState("");
 
   useEffect(() => {
-    api.get(`/pdf/summary/${id}`)
-      .then(res => {
-        setSum(res.data.summary);
-        setQcount(res.data.questions);
-      });
-  }, [id]);
+    api.get(`/quiz/${pdf_id}`).then((res) => setSummary(res.data.summary));
+  }, [pdf_id]);
 
   return (
     <div>
-      <h1>Summary</h1>
-      <p>{sum}</p>
-      <Link to={`/quiz/${id}`}>Start Quiz ({qcount} questions)</Link>
+      <h2>Summary</h2>
+      <p>{summary || "Loading..."}</p>
+      <button onClick={() => navigate(`/quiz/${pdf_id}`)}>Start Quiz</button>
     </div>
   );
 }

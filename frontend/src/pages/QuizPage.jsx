@@ -1,47 +1,53 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
 
 export default function QuizPage() {
-  const { id } = useParams();
+  const { pdf_id } = useParams();
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
+  const [selected, setSelected] = useState("");
 
   useEffect(() => {
-    api.get(`/quiz/${id}`).then(res => setQuestions(res.data.questions));
-  }, [id]);
+    api.get(`/quiz/${pdf_id}`).then((r) => setQuestions(r.data.questions));
+  }, [pdf_id]);
 
-  const answer = async (option) => {
-    const { data } = await api.post("/quiz/answer", {
-      pdf_id: id,
+  async function submitAnswer() {
+    await api.post("/quiz/answer", {
+      pdf_id,
       index: idx,
-      selected_option: option,
+      selected_option: selected,
     });
-    if (data.correct) setScore(score + 1);
-    if (idx + 1 < questions.length) setIdx(idx + 1);
-    else setDone(true);
-  };
+    if (idx + 1 < questions.length) {
+      setIdx(idx + 1);
+      setSelected("");
+    } else {
+      navigate(`/result/${pdf_id}`);
+    }
+  }
 
-  if (questions.length === 0) return <p>Loading…</p>;
+  if (!questions.length) return <p>Loading…</p>;
+  const q = questions[idx];
 
-  return done ? (
+  return (
     <div>
-      <h1>Done!</h1>
-      <p>Your score: {score}/{questions.length}</p>
-    </div>
-  ) : (
-    <div>
-      <h3>Q{idx + 1}: {questions[idx].question}</h3>
-      <ul>
-        {questions[idx].options.map(o => (
-          <li key={o}>
-            <button onClick={() => answer(o)}>{o}</button>
-          </li>
-        ))}
-      </ul>
-      <p>Score: {score}</p>
+      <h3>{q.question}</h3>
+      {q.options.map((o) => (
+        <label key={o}>
+          <input
+            type="radio"
+            value={o}
+            checked={selected === o}
+            onChange={() => setSelected(o)}
+          />
+          {o}
+        </label>
+      ))}
+      <br />
+      <button disabled={!selected} onClick={submitAnswer}>
+        {idx + 1 === questions.length ? "Finish" : "Next"}
+      </button>
     </div>
   );
 }

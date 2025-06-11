@@ -8,25 +8,48 @@ const multer = require("multer");
 const FormData = require("form-data");
 const { PassThrough } = require("stream");
 const PDF = require("./models/PDF");
-
+const path = require("path");
 
 dotenv.config();
 const app = express();
 
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
+// ✅ Connect MongoDB
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ MongoDB connected"))
+.catch((err) => console.error("❌ MongoDB error:", err));
 
-app.use(cors());
+// ✅ CORS (IMPORTANT: credentials & origin for frontend)
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Vite dev server
+    credentials: true, // allow cookies
+  })
+);
+
+// ✅ Middleware
 app.use(express.json());
-app.use(session({
-  secret: 'your-secret-key',
-  resave: false,
-  saveUninitialized: false
-}));
+app.use(express.urlencoded({ extended: true }));
 
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // set true if using https
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  })
+);
+
+// ✅ File Upload Memory Storage
 const upload = multer({ storage: multer.memoryStorage() });
 
+// ✅ Routes
 const authRoutes = require("./routes/auth");
 const quizRoutes = require("./routes/quiz");
 const pdfRoutes = require("./routes/pdf");
@@ -37,6 +60,7 @@ app.use("/quiz", quizRoutes);
 app.use("/pdf", pdfRoutes);
 app.use("/leaderboard", leaderboardRoutes);
 
+// ✅ PDF Upload + AI Microservice Forwarding
 app.post("/api/generate", upload.single("pdf"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -61,23 +85,25 @@ app.post("/api/generate", upload.single("pdf"), async (req, res) => {
       }
     );
 
-    // Save to MongoDB
+    // ✅ Save PDF summary + MCQs to DB
     const newPdf = new PDF({
-      file_path: "", // optional if you don't store locally
+      file_path: "",
       filename: req.file.originalname,
       summary: data.summary,
-      questions: data.mcqs || data.questions, // depends on your microservice key
-      user_id: req.session.user?._id || null // set only if auth is enabled
+      questions: data.mcqs || data.questions,
+      user_id: req.session.user?._id || null,
+      createdAt: new Date(),
     });
 
     const savedPdf = await newPdf.save();
     res.status(200).json(savedPdf);
   } catch (err) {
-    console.error("AI microservice error:", err.message);
+    console.error("❌ AI microservice error:", err.message);
     res.status(500).json({ error: "Processing failed." });
   }
 });
 
+// ✅ Server Start
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
