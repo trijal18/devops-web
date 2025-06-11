@@ -1,4 +1,4 @@
-body {
+/* body {
   font-family: system-ui, sans-serif;
   margin: 0;
   padding: 2rem;
@@ -6,4 +6,20 @@ body {
 button {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
+} */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom animations for your homepage */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(5px) rotate(-1deg); }
 }
+
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
