@@ -1,14 +1,49 @@
-version: "3.9"
+# version: "3.9"
+
+# services:
+#   frontend:
+#     build: ./frontend
+#     ports:
+#       - "5173:5173"
+#     volumes:                # hot-reload during dev
+#       - ./frontend:/app
+#       - /app/node_modules   # keep host node_modules out of the container
+#     command: npm run dev -- --host
+
+#   backend:
+#     build: ./backend
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./backend:/app
+#       - /app/node_modules
+#     command: node server.js
+#     restart: always
+
+#   python_service:
+#     build: ./python_service
+#     ports:
+#       - "5001:5001"
+#     volumes:
+#       - ./python_service:/app
+#     command: >
+#       uvicorn main:app --host 0.0.0.0 --port 5001 --reload
+#     restart: always
+
+# # optional: a shared network is created automatically in Compose ≥ 3
+# versi/on: "3.9"
 
 services:
   frontend:
     build: ./frontend
     ports:
       - "5173:5173"
-    volumes:                # hot-reload during dev
+    volumes:
       - ./frontend:/app
-      - /app/node_modules   # keep host node_modules out of the container
+      - /app/node_modules
     command: npm run dev -- --host
+    # env_file:
+      # - ./frontend/.env
 
   backend:
     build: ./backend
@@ -19,6 +54,8 @@ services:
       - /app/node_modules
     command: node server.js
     restart: always
+    env_file:
+      - ./backend/.env
 
   python_service:
     build: ./python_service
@@ -29,5 +66,5 @@ services:
     command: >
       uvicorn main:app --host 0.0.0.0 --port 5001 --reload
     restart: always
-
-# optional: a shared network is created automatically in Compose ≥ 3
+    env_file:
+      - ./python_service/.env
